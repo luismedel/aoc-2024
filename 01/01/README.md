@@ -44,3 +44,4 @@ To find the *total distance* between the left list and the right list, add up th
 
 Your actual left and right lists contain many location IDs. *What is the total distance between your lists?*
 
+Your puzzle answer was `1873376`.
