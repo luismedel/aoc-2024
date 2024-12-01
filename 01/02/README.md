@@ -1,5 +1,5 @@
 
-## --- Part Two ---
+## Part Two
 
 Your analysis only confirmed what everyone feared: the two lists of location IDs are indeed very different.
 
