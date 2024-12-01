@@ -1,10 +1,11 @@
 
 import os
-from pathlib import Path
+import re
 import sys
+import bs4
 import requests
 import markdownify
-from bs4 import BeautifulSoup
+
 from datetime import datetime
 
 
@@ -23,28 +24,38 @@ if len(sys.argv) < 2:
 else:
     year, day = sys.argv[1].split('/', maxsplit=1)
 
+dir_name = f'{day:02d}'
+
 if len(sys.argv) < 3:
     part = 1
     auto_part = True
 else:
     part = int(sys.argv[2])
 
-dir_name = f'{day:02d}/{part:02d}'
-
-if int(part) == 1 and auto_part and os.path.isdir(dir_name):
+if int(part) == 1 and auto_part and os.path.isdir(dir_name + f"/{part:02d}"):
     part = 2
-    dir_name = f'{day:02d}/{part:02d}'
+dir_name += f'/{part:02d}'
 
-if Path.is_dir(Path(dir_name)):
+if os.path.isdir(dir_name):
     raise Exception(f'Directory {dir_name} already exists')
 
 headers = { 'cookie': f'session={SESSION}' }
 page = requests.get(f"https://adventofcode.com/{year}/day/{day}", headers=headers)
 input = requests.get(f"https://adventofcode.com/{year}/day/{day}/input", headers=headers)
 
-soup = BeautifulSoup(page.content, 'html.parser')
-text = soup.find_all('article')[int(part) - 1]
-md = markdownify.markdownify(str(text), heading_style="ATX")
+soup = bs4.BeautifulSoup(page.content, 'html.parser')
+html = soup.find_all('article')[part - 1]
+text = str(html)
+
+cleanups = [
+    (r"--- (Day \d+: .+) ---", r"\1"),
+    (r"--- Part Two ---", "Part Two"),
+]
+
+for pattern, replace in cleanups:
+    text = re.sub(pattern, replace, text)
+
+md = markdownify.markdownify(text, heading_style="ATX")
 
 os.makedirs(dir_name, exist_ok=True)
 
